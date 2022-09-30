@@ -4,7 +4,7 @@
 
 import pygame
 import os
-
+import math
 #집게 클래스
 class Claw(pygame.sprite.Sprite):
     def __init__(self,image,position):
@@ -85,7 +85,21 @@ class Gemstone(pygame.sprite.Sprite):
         self.rect=image.get_rect(center=position)       #캐릭터가 가지는 데이터
         self.price=price    #보석 가치
         self.speed=speed    #보석에 충돌하고 따른 돌아오는 속도
-        
+    
+    #각도에 따른 보석 가운데에 오기위한 함수(set_position.png) 보석을 끌고오는 함수
+    def set_position(self,position,angle):
+        r=self.rect.size[0]//2     #rect의 0번째 값=사각형의 높이에서 2를 나눈 값 즉 반지름 
+        rad_angle=math.radians(angle)       #집게의 각도 즉 집게를 중심으로부터 출발했을 때의 각도(θ)
+        #claw이미지의 반지름만큼 보석이미지가 닿으면 보석이미지를 끌어옴 
+        #claw이미지의 반지름과 보석들의 이미지반지름 
+        #claw이미지의 중심좌표가 필요하고 보석이미지의 중심좌표가 필요함 
+        #claw center=x,y 라고 가정하고 보석이미지의 좌표는 x',y'라고 가정하면
+        #(x+x',y+y') 즉 이 좌표가 됬을 때 보석을 끌어옴
+        #각 좌표를 구하기 위해서는 sin함수와 cos함수가 필요함
+        to_x=r*math.cos(rad_angle)  #삼각형의 밑변
+        to_y=r*math.sin(rad_angle)  #삼격형의 높이
+        self.rect.center=(position[0]+to_x,position[1]+to_y)    #집게 이미지의 중심점
+
 def setup_gemstone():
 
     #각 보석 별 가치 (price), 속도(speed)
@@ -184,6 +198,9 @@ while runnig:
                 caught_gemstone=gemstone    #잡힌 보석 정보
                 to_x=-gemstone.speed        #잡힌 보석의 속도에 -한 값을 설정
                 break
+    
+    if caught_gemstone: #잡힌보석이 있으면 업데이트 하는 문
+        caught_gemstone.set_position(claw.rect.center,claw.angle)
 
 
     screen.blit(background,(0,0))
